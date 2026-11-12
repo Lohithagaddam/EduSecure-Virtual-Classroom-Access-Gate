@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Classroom Access Gate</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        background: #f4f7fb;
+        color: #1f2937;
+    }
+
+    header {
+        background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        color: white;
+        padding: 25px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    header h1 {
+        font-size: 26px;
+    }
+
+    header p {
+        margin-top: 6px;
+        opacity: 0.9;
+    }
+
+    .status {
+        background: #16a34a;
+        padding: 10px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .scan-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+    }
+
+    .scan-card h2 {
+        margin-bottom: 18px;
+        color: #1e3a8a;
+    }
+
+    .input-area {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    input {
+        flex: 1;
+        min-width: 220px;
+        padding: 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 16px;
+        outline: none;
+    }
+
+    input:focus {
+        border-color: #2563eb;
+    }
+
+    button {
+        padding: 14px 25px;
+        border: none;
+        border-radius: 8px;
+        background: #2563eb;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #1d4ed8;
+    }
+
+    button:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    .result {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .allowed {
+        background: #dcfce7;
+        border: 1px solid #86efac;
+        color: #166534;
+    }
+
+    .denied {
+        background: #fee2e2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+    }
+
+    .result h2 {
+        margin-bottom: 12px;
+    }
+
+    .details {
+        line-height: 1.8;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 22px;
+        border-radius: 14px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+        text-align: center;
+    }
+
+    .stat-card h3 {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .stat-card .number {
+        font-size: 30px;
+        font-weight: bold;
+        color: #1e3a8a;
+    }
+
+    .logs {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+
+    .logs h2 {
+        margin-bottom: 18px;
+        color: #1e3a8a;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+    }
+
+    th, td {
+        padding: 13px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+        background: #eff6ff;
+        color: #1e3a8a;
+    }
+
+    .allowed-text {
+        color: #15803d;
+        font-weight: bold;
+    }
+
+    .denied-text {
+        color: #dc2626;
+        font-weight: bold;
+    }
+
+    .clear-btn {
+        background: #6b7280;
+        margin-top: 15px;
+    }
+
+    .clear-btn:hover {
+        background: #4b5563;
+    }
+
+    footer {
+        text-align: center;
+        padding: 25px;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    @media (max-width: 800px) {
+        .stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 500px) {
+        .stats {
+            grid-template-columns: 1fr;
+        }
+
+        .input-area {
+            flex-direction: column;
+        }
+
+        input, button {
+            width: 100%;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div>
+        <h1>🔐 Virtual Classroom Access Gate</h1>
+        <p>Software-Based RFID Authentication System</p>
+    </div>
+
+    <div class="status">● AWS CLOUD CONNECTED</div>
+</header>
+
+<div class="container">
+
+    <!-- RFID SCANNER -->
+    <div class="scan-card">
+        <h2>RFID Access Verification</h2>
+
+        <div class="input-area">
+            <input
+                type="text"
+                id="rfidInput"
+                placeholder="Enter RFID ID (Example: RFID001)"
+            >
+
+            <button id="scanButton" onclick="verifyRFID()">
+                Scan & Verify
+            </button>
+        </div>
+
+        <div id="result" class="result">
+            <h2 id="resultTitle"></h2>
+
+            <div class="details">
+                <p><strong>RFID ID:</strong> <span id="resultRFID">-</span></p>
+                <p><strong>Student ID:</strong> <span id="resultStudent">-</span></p>
+                <p><strong>Name:</strong> <span id="resultName">-</span></p>
+                <p><strong>Classroom:</strong> <span id="resultClassroom">-</span></p>
+                <p><strong>Time:</strong> <span id="resultTime">-</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATISTICS -->
+    <div class="stats">
+
+        <div class="stat-card">
+            <h3>Total Attempts</h3>
+            <div class="number" id="totalAttempts">0</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Access Allowed</h3>
+            <div class="number" id="allowedCount">0</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Access Denied</h3>
+            <div class="number" id="deniedCount">0</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Classroom</h3>
+            <div class="number" style="font-size:18px;">
+                Cloud Computing
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ACCESS LOG -->
+    <div class="logs">
+        <h2>Recent Access Attempts</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>RFID ID</th>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Classroom</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+
+            <tbody id="logTable">
+            </tbody>
+        </table>
+
+        <button class="clear-btn" onclick="clearLogs()">
+            Clear Dashboard Logs
+        </button>
+    </div>
+
+</div>
+
+<footer>
+    Virtual Classroom Access Gate | AWS IoT Core + Lambda + DynamoDB + API Gateway
+</footer>
+
+<script>
+
+const API_URL =
+"https://xl8qo32ul7.execute-api.us-east-1.amazonaws.com/rfid";
+
+let totalAttempts = 0;
+let allowedCount = 0;
+let deniedCount = 0;
+
+async function verifyRFID() {
+
+    const rfidInput = document.getElementById("rfidInput");
+    const button = document.getElementById("scanButton");
+    const result = document.getElementById("result");
+
+    const rfid = rfidInput.value.trim();
+
+    if (rfid === "") {
+        alert("Please enter an RFID ID.");
+        rfidInput.focus();
+        return;
+    }
+
+    button.disabled = true;
+    button.innerText = "Checking...";
+
+    try {
+
+        const response = await fetch(API_URL, {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                rfid_id: rfid,
+                classroom: "Cloud Computing"
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Request failed");
+        }
+
+        displayResult(data);
+        addLog(data);
+
+    } catch (error) {
+
+        result.style.display = "block";
+        result.className = "result denied";
+
+        document.getElementById("resultTitle").innerText =
+            "⚠️ CONNECTION ERROR";
+
+        document.getElementById("resultRFID").innerText = rfid;
+        document.getElementById("resultStudent").innerText = "-";
+        document.getElementById("resultName").innerText = error.message;
+        document.getElementById("resultClassroom").innerText =
+            "Cloud Computing";
+        document.getElementById("resultTime").innerText =
+            new Date().toLocaleString();
+
+    }
+
+    button.disabled = false;
+    button.innerText = "Scan & Verify";
+}
+
+
+function displayResult(data) {
+
+    const result = document.getElementById("result");
+
+    result.style.display = "block";
+
+    document.getElementById("resultRFID").innerText =
+        data.rfid_id || "-";
+
+    document.getElementById("resultStudent").innerText =
+        data.student_id || "-";
+
+    document.getElementById("resultName").innerText =
+        data.name || "-";
+
+    document.getElementById("resultClassroom").innerText =
+        data.classroom || "Cloud Computing";
+
+    document.getElementById("resultTime").innerText =
+        data.timestamp
+            ? new Date(data.timestamp).toLocaleString()
+            : new Date().toLocaleString();
+
+    if (data.status === "ACCESS ALLOWED") {
+
+        result.className = "result allowed";
+
+        document.getElementById("resultTitle").innerText =
+            "✅ ACCESS ALLOWED";
+
+    } else {
+
+        result.className = "result denied";
+
+        document.getElementById("resultTitle").innerText =
+            "❌ ACCESS DENIED";
+    }
+}
+
+
+function addLog(data) {
+
+    totalAttempts++;
+
+    if (data.status === "ACCESS ALLOWED") {
+        allowedCount++;
+    } else {
+        deniedCount++;
+    }
+
+    document.getElementById("totalAttempts").innerText =
+        totalAttempts;
+
+    document.getElementById("allowedCount").innerText =
+        allowedCount;
+
+    document.getElementById("deniedCount").innerText =
+        deniedCount;
+
+    const table = document.getElementById("logTable");
+
+    const row = document.createElement("tr");
+
+    const statusClass =
+        data.status === "ACCESS ALLOWED"
+            ? "allowed-text"
+            : "denied-text";
+
+    const time = data.timestamp
+        ? new Date(data.timestamp).toLocaleString()
+        : new Date().toLocaleString();
+
+    row.innerHTML = `
+        <td>${escapeHTML(data.rfid_id || "-")}</td>
+        <td>${escapeHTML(data.student_id || "-")}</td>
+        <td>${escapeHTML(data.name || "-")}</td>
+        <td>${escapeHTML(data.classroom || "-")}</td>
+        <td class="${statusClass}">
+            ${escapeHTML(data.status || "-")}
+        </td>
+        <td>${escapeHTML(time)}</td>
+    `;
+
+    table.insertBefore(row, table.firstChild);
+}
+
+
+function clearLogs() {
+
+    document.getElementById("logTable").innerHTML = "";
+
+    totalAttempts = 0;
+    allowedCount = 0;
+    deniedCount = 0;
+
+    document.getElementById("totalAttempts").innerText = "0";
+    document.getElementById("allowedCount").innerText = "0";
+    document.getElementById("deniedCount").innerText = "0";
+
+    document.getElementById("result").style.display = "none";
+}
+
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// Press Enter to scan
+document.getElementById("rfidInput").addEventListener(
+    "keypress",
+    function(event) {
+
+        if (event.key === "Enter") {
+            verifyRFID();
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
